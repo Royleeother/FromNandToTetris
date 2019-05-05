@@ -1,0 +1,52 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux4Way16.hdl
+
+/**
+ * 4-way 16-bit multiplexor:
+ * out = a if sel == 00
+ *       b if sel == 01
+ *       c if sel == 10
+ *       d if sel == 11
+ */
+
+CHIP Mux4Way16 {
+    IN a[16], b[16], c[16], d[16], sel[2];
+    OUT out[16];
+
+    PARTS:
+    // Put your code here:
+    // case_a
+    Or(a=sel[0], b=sel[1], out=dzero);
+    Mux16(a= a , b[0..15] = false , sel= dzero , out= caseA);
+
+    // case_b
+    Not(in=sel[0], out=notSel1);
+    Or(a=sel[1], b=notSel1, out=zeroOne);
+    Mux16(a=b, b[0..15]=false, sel= zeroOne, out= caseB);
+
+    // case_c
+    Not(in=sel[1], out=notSel0);
+    Or(a=sel[0], b= notSel0, out= oneZero);
+    Mux16(a=c, b[0..15]=false, sel= oneZero, out=caseC);
+
+    //case_d
+    And(a=sel[0], b = sel[1], out = oo);
+    Mux16(a[0..15]=false, b=d ,sel=oo, out=caseD);
+
+    Or16(a=caseA, b=caseB, out=temp);
+    Or16(a=temp, b=caseC, out=temp1);
+    Or16(a=temp1, b=caseD, out=out);
+    
+    /*
+    // First selection bit
+    Mux16(a=a, b=b, sel=sel[0], out=mux0);
+    Mux16(a=c, b=d, sel=sel[0], out=mux1);
+
+    // Second selection bit
+    Mux16(a=mux0, b=mux1, sel=sel[1], out=out);
+    // very samrt and economic
+    */
+
+}
