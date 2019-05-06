@@ -1,0 +1,7 @@
+CHIP IsNeg {
+    IN sel[16];
+    OUT out;
+
+    PARTS:
+    Mux(a=false, b=true, sel=sel[15], out=out);
+}

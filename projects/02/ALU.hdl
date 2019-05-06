@@ -42,5 +42,43 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-   // Put you code here:
+
+   // zx
+   Mux16(a=x, b=false, sel=zx, out=x1);
+   // nx
+   Not16(in=x1, out=x2);
+   Mux16(a=x1, b=x2, sel=nx, out=x3);
+   // zy
+   Mux16(a=y, b=false, sel=zy, out=y1);
+   // ny
+   Not16(in=y1, out=y2);
+   Mux16(a=y1, b=y2, sel=ny, out=y3);
+   // f
+   Add16(a=x3, b=y3, out=o1); // x + y
+   And16(a=x3, b=y3, out=o2); // x & y
+   Mux16(a=o2, b=o1, sel=f, out=o3);
+   // no
+   Not16(in=o3, out=o4);
+   Mux16(a=o3, b=o4, sel=no, out=final);
+   Mux16(a=final, b=false, sel=false, out=out);
+
+ // 还没做完 ，明天继续
+   // zero
+   /*Or8Way(in=final[0..7], out=or1);
+   Or8Way(in=final[8..15], out=or2);
+   Or(a=or1, b=or2, out=zero);
+   Mux16(a=true, b=false, sel=zero, out=zr);
+
+   Mux(a=false, b=true, sel=final[15], out=ng);
+
+   YOU CAN'T DO THIS IN THIS IDE, 
+   SO YOU SHOULD CREATE A Or16Way OUTSIDE
+   */
+   // zero
+   Or16Way(in=final, out=zero);
+   Mux(a=true, b=false, sel=zero, out=zr);
+
+   // Not negative
+   IsNeg(sel=final, out=ng);
+   
 }
