@@ -1,0 +1,8 @@
+CHIP DMux16 {
+    IN in[16], sel;
+    OUT a[16], b[16];
+
+    PARTS:
+    Mux16(a=in, b=false, sel=sel, out=a);
+    Mux(a=false, b=in, sel=sel, out=b);
+}

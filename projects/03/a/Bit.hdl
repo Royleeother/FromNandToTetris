@@ -15,4 +15,12 @@ CHIP Bit {
 
     PARTS:
     // Put your code here:
+    /*DFF(in=in, out=inAfterDff1);
+    Mux(a=in, b=inAfterDff1, sel=load, out=f1);
+    */
+    // @source: cmoylan
+    Mux(a=dffOut, b=in, sel=load, out=muxOut);
+    DFF(in=muxOut, out=dffOut, out=out);
+    // So to implement recursion in this language,
+    // sequence matters !!!  that's beautiful
 }

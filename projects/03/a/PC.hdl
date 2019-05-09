@@ -17,4 +17,15 @@ CHIP PC {
 
     PARTS:
     // Put your code here:
+    // Pin priority: reset, load, inc, so we should implement inc load reset
+    // inc
+    Add16(a=outin, b[0]=true, out=addO);
+    Mux16(a=outin, b=addO, sel=inc, out=incO);
+    // load
+    Mux16(a=incO, b=in, sel=load, out=loadO);  
+    // reset
+    Mux16(a=loadO, b=false, sel=reset, out=resetO);
+    
+    // circle
+    Register(in=resetO, load=true, out= outin, out=out);
 }
