@@ -20,6 +20,15 @@
  * map. Access to address 0x6000 results in accessing the keyboard 
  * memory map. The behavior in these addresses is described in the 
  * Screen and Keyboard chip specifications given in the book.
+ *
+ * Screen {
+ *    IN in[16], load, address[13]
+ *    OUT out[16]
+ * }
+ *
+ * Keyboard {
+ *    OUT out[16]
+ * }
  */
 
 CHIP Memory {
@@ -28,4 +37,22 @@ CHIP Memory {
 
     PARTS:
     // Put your code here:
+    // should I build a 16K + 8K + 1 bits Register ?
+    // MM stands for memory-map
+
+    DMux(in=load, sel=address[14], a=loadToRam, b=loadToMM);
+
+    RAM16K(in= in, load=loadToRam, address= address[0..13], out= outRAM);  // RAM
+    
+    // if loadToMM, we need to decide specified to screen or keyboard
+    DMux(in= loadToMM, sel=address[13], a=loadToScreen, b=loadToKB);
+    
+    Screen(in= in, load=loadToScreen, address= address[0..12], out= outScreen);
+    Keyboard(out=outKB);
+
+    Mux16(a=outScreen, b=outKB, sel=address[13], out=outMM);
+    // Ending Manipulate on Memory Map
+
+    Mux16(a=outRAM, b=outMM, sel=address[14], out=out);
+
 }

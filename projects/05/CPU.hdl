@@ -40,4 +40,50 @@ CHIP CPU {
 
     PARTS:
     // Put your code here:
+
+    // Start instruction handling 
+    // Instruction decoding
+    Mux16(a=instruction, b=ALUtoA, sel= instruction[15], out= decode);
+
+    // if is A-ins, load = true, else, depends on dest.
+    Mux(a=true, b=instruction[5], sel=instruction[15], out=LoadARes); 
+    ARegister(in=decode, load=LoadARes, out=AResOP, out[0..14]=addressM);  // A Resgister
+   
+    // Instruction execution
+    And (a=instruction[3], b=instruction[15], out=writeM);
+
+    And (a=instruction[4], b=instruction[15], out=storeInD);
+    DRegister(in=ALUtoD, load=storeInD, out=DOut);  // D Resgister
+
+    // input to the ALU either input from memory or from registerA
+    Mux16(a=AResOP, b=inM, sel=instruction[12], out=AResOrDataM); // 原来是这里搞错了，a,b input要分清
+    
+    ALU(x=DOut, y=AResOrDataM, zx=instruction[11], nx=instruction[10], 
+    zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6], 
+    out=ALUtoA, out=ALUtoD, out= outM, zr=zr, ng=ng);
+    
+
+    // Next insturction fetching
+    // Compute the 8 bools for different jump options
+    // No jump
+    Not (in=true, out=nojmp);
+    // Jump
+    Not (in=false, out=jmp);
+    // is Zero
+    And (a=true, b=zr, out=jeq);
+    // is Neg
+    And (a=true, b=ng, out=jlt);
+    // is not Zero
+    Not (in=zr, out=jne);
+    // is Pos
+    Not (in=jle, out=jgt);
+    // is Zero or Pos
+    Or (a=zr, b=jgt, out=jge);
+    // is Zero or Neg
+    Or (a=zr, b=ng, out=jle);
+    // Compute whether we need to jump in the next instruction
+    Mux8Way (a=nojmp, b=jgt, c=jeq, d=jge, e=jlt, f=jne, g=jle, h=jmp, sel=instruction[0..2], out=maybeJump);
+    And (a= instruction[15], b=maybeJump, out=shouldJump);
+
+    PC(in=AResOP, load=shouldJump, inc=true, reset=reset, out[0..14]=pc);
 }
